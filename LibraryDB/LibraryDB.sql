@@ -1,4 +1,4 @@
-Create db LibraryDB;
+Create database LibraryDB;
 GO 
 
 USE LibraryDB;
