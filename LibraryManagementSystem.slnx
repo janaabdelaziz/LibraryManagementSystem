@@ -1,3 +1,11 @@
 <Solution>
-  <Project Path="LibraryApp/LibraryApp.csproj" />
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Default" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="LibraryApp/LibraryApp.csproj" Id="8d437f03-b57d-4ca9-9221-f6598a7d2f21">
+    <BuildType Solution="Default|*" Project="Release" />
+    <Build Solution="Default|*" Project="false" />
+  </Project>
 </Solution>
