@@ -32,6 +32,9 @@
             this.btnSearch = new System.Windows.Forms.Button();
             this.dgvBooks = new System.Windows.Forms.DataGridView();
             this.label1 = new System.Windows.Forms.Label();
+            this.dtpDueDate = new System.Windows.Forms.DateTimePicker();
+            this.btnBorrow = new System.Windows.Forms.Button();
+            this.btnReserve = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBooks)).BeginInit();
             this.SuspendLayout();
             // 
@@ -55,11 +58,11 @@
             // dgvBooks
             // 
             this.dgvBooks.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvBooks.Location = new System.Drawing.Point(83, 251);
+            this.dgvBooks.Location = new System.Drawing.Point(105, 203);
             this.dgvBooks.Name = "dgvBooks";
             this.dgvBooks.RowHeadersWidth = 51;
             this.dgvBooks.RowTemplate.Height = 24;
-            this.dgvBooks.Size = new System.Drawing.Size(547, 181);
+            this.dgvBooks.Size = new System.Drawing.Size(521, 109);
             this.dgvBooks.TabIndex = 2;
             // 
             // label1
@@ -71,11 +74,41 @@
             this.label1.TabIndex = 3;
             this.label1.Text = "search book title: ";
             // 
+            // dtpDueDate
+            // 
+            this.dtpDueDate.Location = new System.Drawing.Point(201, 328);
+            this.dtpDueDate.Name = "dtpDueDate";
+            this.dtpDueDate.Size = new System.Drawing.Size(322, 22);
+            this.dtpDueDate.TabIndex = 4;
+            // 
+            // btnBorrow
+            // 
+            this.btnBorrow.Location = new System.Drawing.Point(105, 377);
+            this.btnBorrow.Name = "btnBorrow";
+            this.btnBorrow.Size = new System.Drawing.Size(123, 35);
+            this.btnBorrow.TabIndex = 5;
+            this.btnBorrow.Text = "borrow selected";
+            this.btnBorrow.UseVisualStyleBackColor = true;
+            this.btnBorrow.Click += new System.EventHandler(this.btnBorrow_Click);
+            // 
+            // btnReserve
+            // 
+            this.btnReserve.Location = new System.Drawing.Point(508, 377);
+            this.btnReserve.Name = "btnReserve";
+            this.btnReserve.Size = new System.Drawing.Size(118, 35);
+            this.btnReserve.TabIndex = 6;
+            this.btnReserve.Text = "reserve selected";
+            this.btnReserve.UseVisualStyleBackColor = true;
+            this.btnReserve.Click += new System.EventHandler(this.btnReserve_Click);
+            // 
             // BookSearchForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(707, 503);
+            this.Controls.Add(this.btnReserve);
+            this.Controls.Add(this.btnBorrow);
+            this.Controls.Add(this.dtpDueDate);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.dgvBooks);
             this.Controls.Add(this.btnSearch);
@@ -95,5 +128,8 @@
         private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.DataGridView dgvBooks;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.DateTimePicker dtpDueDate;
+        private System.Windows.Forms.Button btnBorrow;
+        private System.Windows.Forms.Button btnReserve;
     }
 }

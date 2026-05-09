@@ -31,8 +31,19 @@ namespace LibraryApp
 
         private void btnOpenBookSearch_Click(object sender, EventArgs e)
         {
-            BookSearchForm f = new BookSearchForm();
+            int currentUserId = 1;  // use a real existing UserID for now
+            BookSearchForm f = new BookSearchForm(currentUserId);
             f.Show();
+        }
+
+        private void btnMyHistory_Click(object sender, EventArgs e)
+        {
+            // TODO: replace 1 with an actual UserID from your USERS table
+            int currentUserId = 1;
+
+            BorrowingHistoryForm f = new BorrowingHistoryForm(currentUserId);
+            f.Show();
+
         }
     }
 }

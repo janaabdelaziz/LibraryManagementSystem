@@ -56,7 +56,59 @@ namespace LibraryManagementSystem
             return dbMan.ExecuteReader(query);
         }
 
-        // You can add more methods here for other operations
+        public DataTable GetBorrowingHistoryForUser(int userId)
+        {
+            string query =
+                "SELECT B.Title, BC.CopyID, Br.BorrowDate, Br.DueDate, Br.ReturnDate, BC.Status " +
+                "FROM BORROWING Br " +
+                "JOIN BOOK_COPIES BC ON Br.CopyID = BC.CopyID " +
+                "JOIN BOOKS B ON BC.BookID = B.BookID " +
+                "WHERE Br.UserID = " + userId + " " +
+                "ORDER BY Br.BorrowDate DESC;";
+
+            return dbMan.ExecuteReader(query);
+        }
+
+
+        public int BorrowBook(int userId, int copyId, DateTime dueDate)
+        {
+            // Insert into BORROWING
+            string insertBorrow =
+                "INSERT INTO BORROWING (UserID, CopyID, BorrowDate, DueDate, ReturnDate) " +
+                "VALUES (" + userId + ", " + copyId + ", GETDATE(), '" +
+                dueDate.ToString("yyyy-MM-dd") + "', NULL);";
+
+            int rows1 = dbMan.ExecuteNonQuery(insertBorrow);
+
+            // Update BOOK_COPIES status
+            string updateCopy =
+                "UPDATE BOOK_COPIES SET Status = 'Borrowed' WHERE CopyID = " + copyId + ";";
+
+            int rows2 = dbMan.ExecuteNonQuery(updateCopy);
+
+            return rows1 + rows2;   // > 0 means success
+        }
+
+        public int ReserveBook(int userId, int copyId)
+        {
+            string insertReservation =
+                "INSERT INTO RESERVATION (UserID, CopyID, ReservationDate, Status) " +
+                "VALUES (" + userId + ", " + copyId + ", GETDATE(), 'Pending');";
+
+            int rows1 = dbMan.ExecuteNonQuery(insertReservation);
+
+            // Optional: mark copy as Reserved if you want
+            string updateCopy =
+                "UPDATE BOOK_COPIES SET Status = 'Reserved' WHERE CopyID = " + copyId + ";";
+
+            int rows2 = dbMan.ExecuteNonQuery(updateCopy);
+
+            return rows1 + rows2;
+        }
+
+
+        ////////////////////////////////////////////////////////
+        ////add more methods here:
 
     }
 

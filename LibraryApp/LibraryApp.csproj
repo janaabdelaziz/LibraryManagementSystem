@@ -47,6 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BorrowingHistoryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BorrowingHistoryForm.Designer.cs">
+      <DependentUpon>BorrowingHistoryForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controller.cs" />
     <Compile Include="DBManager.cs" />
     <Compile Include="Form1.cs">
@@ -65,6 +71,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="BookSearchForm.resx">
       <DependentUpon>BookSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BorrowingHistoryForm.resx">
+      <DependentUpon>BorrowingHistoryForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
