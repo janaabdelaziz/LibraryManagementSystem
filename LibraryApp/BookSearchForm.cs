@@ -9,30 +9,28 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-
-
 namespace LibraryApp
 {
-    
-    public partial class Form1 : Form
+    public partial class BookSearchForm : Form
     {
         Controller controllerObj;
-        public Form1()
+        public BookSearchForm()
         {
             InitializeComponent();
             controllerObj = new Controller();
         }
 
-        private void btnCountUsers_Click(object sender, EventArgs e)
+        private void BookSearchForm_Load(object sender, EventArgs e)
         {
-            int count = controllerObj.CountUsers();
-            MessageBox.Show("Number of users = " + count);
+
         }
 
-        private void btnOpenBookSearch_Click(object sender, EventArgs e)
+        private void btnSearch_Click(object sender, EventArgs e)
         {
-            BookSearchForm f = new BookSearchForm();
-            f.Show();
+            string titleFilter = txtTitleFilter.Text.Trim();
+            DataTable dt = controllerObj.SearchBooksByTitle(titleFilter);
+            dgvBooks.DataSource = dt;
+
         }
     }
 }
