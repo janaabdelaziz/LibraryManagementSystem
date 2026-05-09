@@ -174,7 +174,7 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.ForeColor = System.Drawing.SystemColors.ControlLight;
             this.Name = "SignUp";
             this.Text = "SignUp";
             this.ResumeLayout(false);
