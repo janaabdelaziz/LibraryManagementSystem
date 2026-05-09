@@ -117,10 +117,38 @@ namespace LibraryManagementSystem
             return rows1 + rows2;
         }
 
+        public int InsertBook(string title, string ISBN, int publisher_id, int category_id, int publication_year, int numberOfCopies, string bookAuthor, string shelfLocation ="General")
+        {
+            try
+            {
+                string insertBook = $@" INSERT INTO BOOKS (Title, ISBN, PublisherID, CategoryID, PublicationYear)  VALUES('{title}','{ISBN}',{publisher_id},{category_id},{publication_year}); SELECT SCOPE_IDENTITY();";
+                object result = dbMan.ExecuteScalar(insertBook);
+                // Step 2: Insert Book Copies
+                int newBookID = Convert.ToInt32(result); ;
+                if (result == null)
+                    return 0;
+                for (int i = 1; i <= numberOfCopies; i++)
+                {
+                    string insertCopyQuery = $@"
+                        INSERT INTO BOOK_COPIES (BookID, Status, ShelfLocation)
+                        VALUES ({newBookID}, 'Available', '{shelfLocation}');";
 
-        ////////////////////////////////////////////////////////
-        ////add more methods here:
+                    dbMan.ExecuteNonQuery(insertCopyQuery);
+                }
+                return newBookID;   // Return the new BookID if successful
+            }
+            catch(Exception ex)
+            {
+                
+                    // You can log the exception here if needed
+                    return -1; // -1 means error
+                
+            }
 
+            ////////////////////////////////////////////////////////
+            ////add more methods here:
+
+        }
     }
 
 }

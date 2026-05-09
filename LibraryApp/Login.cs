@@ -24,7 +24,7 @@ namespace LibraryApp
 
             DataTable dt = controller.Login(usertxt.Text, passtxt.Text);
 
-            if (dt.Rows.Count == 0)
+            if (dt == null || dt.Rows.Count == 0)
             {
                 MessageBox.Show("Wrong username or password");
                 return;
