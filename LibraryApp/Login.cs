@@ -20,48 +20,54 @@ namespace LibraryApp
 
         private void loginbtn_Click(object sender, EventArgs e)
         {
-            Controller controller = new Controller();
+                Controller controller = new Controller();
 
             DataTable dt = controller.Login(usertxt.Text, passtxt.Text);
 
-            if (dt == null || dt.Rows.Count == 0)
+            if (dt.Rows.Count == 0)
             {
                 MessageBox.Show("Wrong username or password");
                 return;
             }
 
-            string status = dt.Rows[0]["Status"].ToString();
+            bool isActive = Convert.ToBoolean(dt.Rows[0]["IsActive"]);
 
-            if (status != "Active")
+            if (!isActive)
             {
-                MessageBox.Show("Account is not active");
+                MessageBox.Show("This account is deactivated.");
                 return;
             }
 
-            string role = dt.Rows[0]["RoleID"].ToString();
+            string role = dt.Rows[0]["RoleName"].ToString();
 
-            if (role == "1")
+            //if (role == "Admin")
+            //{
+            //    AdminDashboard admin = new AdminDashboard();
+            //    admin.Show();
+            //}
+            //else if (role == "Librarian")
+            //{
+            //    LibrarianDashboard librarian = new LibrarianDashboard();
+            //    librarian.Show();
+            //}
+            //else
+            if (role == "Member")
             {
-                AdminDashboard form = new AdminDashboard();
-                form.Show();
+                Form1 f = new Form1();
+                f.Show();
             }
-            else if (role == "3")
+            else if (role == "Librarian" || role == "Admin")
             {
-                Form1 form = new Form1();
-                form.Show();
+                LibrarianDashboard dash = new LibrarianDashboard();
+                dash.Show();
             }
-            else if (role == "4")
+            else
             {
-                Form1 form = new Form1();
-                form.Show();
-            }
-            else if (role == "2")
-            {
-                LibrarianDashboard form = new LibrarianDashboard();
-                form.Show();
+                Form1 f = new Form1();
+                f.Show();
             }
 
-                //this.Hide();
+            this.Hide();
         }
 
         private void signupbtn_Click(object sender, EventArgs e)
@@ -71,10 +77,9 @@ namespace LibraryApp
             signUpForm.Show();
         }
 
-        private void forgotbtn_Click(object sender, EventArgs e)
+        private void Login_Load(object sender, EventArgs e)
         {
-            ChangePassword chpass = new ChangePassword();
-            chpass.Show();
+
         }
     }
 }

@@ -1,11 +1,10 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using System.Data;
 
 namespace LibraryManagementSystem
 {
@@ -18,63 +17,29 @@ namespace LibraryManagementSystem
             dbMan = new DBManager();
         }
 
-        // Example: count all users in USERS table (safe cast)
+        // Example: count all users in USERS table
         public int CountUsers()
         {
             string query = "SELECT COUNT(UserID) FROM USERS;";
             object result = dbMan.ExecuteScalar(query);
 
-            if (result == null || result == DBNull.Value)
+            if (result == null)
                 return 0;
 
-            return Convert.ToInt32(result);
+            return (int)result;
         }
-
-        public int Signup(string name, string email, string phone, string password)
+        public DataTable Login(string username, string password)
         {
             string query = @"
-        INSERT INTO USERS (Name, Email, Password, Phone, RoleID, RegistrationDate, Status)
-        VALUES (
-            '" + name + @"',
-            '" + email + @"',
-            '" + password + @"',
-            '" + phone + @"',
-            (SELECT RoleID FROM ROLES WHERE RoleName = 'Member'),
-            GETDATE(),
-            'Active'
-        )";
+        SELECT U.UserID, U.FullName, U.Username, U.IsActive, R.RoleName
+        FROM USERS U
+        JOIN ROLES R ON U.RoleID = R.RoleID
+        WHERE U.Username = '" + username + @"'
+        AND U.Password = '" + password + "'";
 
-            return dbMan.ExecuteNonQuery(query);
-        }
-
-        public int ChangePassword(string email, string oldPassword, string newPassword)
-        {
-            string query = @"
-        UPDATE USERS
-        SET Password = '" + newPassword + @"'
-        WHERE Email = '" + email + @"'
-        AND Password = '" + oldPassword + @"'
-        AND Status = 'Active'";
-
-            return dbMan.ExecuteNonQuery(query);
-        }
-
-        public DataTable Login(string email, string password)
-        {
-            // NOTE: store hashed + salted password in DB instead of plain text. This example keeps the existing shape,
-            // but uses parameterized command to avoid injection.
-            string query = @"
-                SELECT U.UserID, U.Name, U.Email, U.Password, U.Phone, R.RoleID, U.Status, U.RegistrationDate
-                FROM USERS U
-                JOIN ROLES R ON U.RoleID = R.RoleID
-                WHERE U.Email = @email AND U.Password = @password;";
-
-            using (SqlCommand cmd = new SqlCommand(query))
-            {
-                cmd.Parameters.Add("@email", SqlDbType.NVarChar).Value = (object)email ?? DBNull.Value;
-                cmd.Parameters.Add("@password", SqlDbType.NVarChar).Value = (object)password ?? DBNull.Value;
-                return dbMan.ExecuteReader(cmd);
-            }
+            DataTable dt = dbMan.ExecuteReader(query);
+            if (dt == null) dt = new DataTable();
+            return dt;
         }
 
         // Example: select all users (for a DataGridView later)
@@ -99,13 +64,9 @@ namespace LibraryManagementSystem
                 "LEFT JOIN CATEGORIES C ON B.CategoryID = C.CategoryID " +
                 "LEFT JOIN PUBLISHERS P ON B.PublisherID = P.PublisherID " +
                 "LEFT JOIN BOOK_COPIES BC ON B.BookID = BC.BookID " +
-                "WHERE B.Title LIKE @titlePart;";
+                "WHERE B.Title LIKE '%" + titlePart + "%';";
 
-            using (SqlCommand cmd = new SqlCommand(query))
-            {
-                cmd.Parameters.Add("@titlePart", SqlDbType.NVarChar).Value = "%" + (titlePart ?? string.Empty) + "%";
-                return dbMan.ExecuteReader(cmd);
-            }
+            return dbMan.ExecuteReader(query);
         }
 
         public DataTable GetBorrowingHistoryForUser(int userId)
@@ -115,87 +76,259 @@ namespace LibraryManagementSystem
                 "FROM BORROWING Br " +
                 "JOIN BOOK_COPIES BC ON Br.CopyID = BC.CopyID " +
                 "JOIN BOOKS B ON BC.BookID = B.BookID " +
-                "WHERE Br.UserID = @userId " +
+                "WHERE Br.UserID = " + userId + " " +
                 "ORDER BY Br.BorrowDate DESC;";
 
-            using (SqlCommand cmd = new SqlCommand(query))
-            {
-                cmd.Parameters.Add("@userId", SqlDbType.Int).Value = userId;
-                return dbMan.ExecuteReader(cmd);
-            }
+            return dbMan.ExecuteReader(query);
         }
 
 
         public int BorrowBook(int userId, int copyId, DateTime dueDate)
         {
-            // Use a transaction to ensure both insert and update succeed together.
-            using (SqlCommand insertBorrow = new SqlCommand(
+            // Insert into BORROWING
+            string insertBorrow =
                 "INSERT INTO BORROWING (UserID, CopyID, BorrowDate, DueDate, ReturnDate) " +
-                "VALUES (@userId, @copyId, GETDATE(), @dueDate, NULL);"))
-            using (SqlCommand updateCopy = new SqlCommand(
-                "UPDATE BOOK_COPIES SET Status = 'Borrowed' WHERE CopyID = @copyId;"))
-            {
-                insertBorrow.Parameters.Add("@userId", SqlDbType.Int).Value = userId;
-                insertBorrow.Parameters.Add("@copyId", SqlDbType.Int).Value = copyId;
-                insertBorrow.Parameters.Add("@dueDate", SqlDbType.Date).Value = dueDate.Date;
+                "VALUES (" + userId + ", " + copyId + ", GETDATE(), '" +
+                dueDate.ToString("yyyy-MM-dd") + "', NULL);";
 
-                updateCopy.Parameters.Add("@copyId", SqlDbType.Int).Value = copyId;
+            int rows1 = dbMan.ExecuteNonQuery(insertBorrow);
 
-                var commands = new[] { insertBorrow, updateCopy };
-                return dbMan.ExecuteTransaction(commands);
-            }
+            // Update BOOK_COPIES status
+            string updateCopy =
+                "UPDATE BOOK_COPIES SET Status = 'Borrowed' WHERE CopyID = " + copyId + ";";
+
+            int rows2 = dbMan.ExecuteNonQuery(updateCopy);
+
+            return rows1 + rows2;   // > 0 means success
         }
 
         public int ReserveBook(int userId, int copyId)
         {
-            using (SqlCommand insertReservation = new SqlCommand(
+            string insertReservation =
                 "INSERT INTO RESERVATION (UserID, CopyID, ReservationDate, Status) " +
-                "VALUES (@userId, @copyId, GETDATE(), 'Pending');"))
-            using (SqlCommand updateCopy = new SqlCommand(
-                "UPDATE BOOK_COPIES SET Status = 'Reserved' WHERE CopyID = @copyId;"))
-            {
-                insertReservation.Parameters.Add("@userId", SqlDbType.Int).Value = userId;
-                insertReservation.Parameters.Add("@copyId", SqlDbType.Int).Value = copyId;
+                "VALUES (" + userId + ", " + copyId + ", GETDATE(), 'Pending');";
 
-                updateCopy.Parameters.Add("@copyId", SqlDbType.Int).Value = copyId;
+            int rows1 = dbMan.ExecuteNonQuery(insertReservation);
 
-                var commands = new[] { insertReservation, updateCopy };
-                return dbMan.ExecuteTransaction(commands);
-            }
+            // Optional: mark copy as Reserved if you want
+            string updateCopy =
+                "UPDATE BOOK_COPIES SET Status = 'Reserved' WHERE CopyID = " + copyId + ";";
+
+            int rows2 = dbMan.ExecuteNonQuery(updateCopy);
+
+            return rows1 + rows2;
         }
 
-        public int InsertBook(string title, string ISBN, int publisher_id, int category_id, int publication_year, int numberOfCopies, string bookAuthor, string shelfLocation ="General")
+
+        ////////////////////////////////////////////////////////
+        ////add more methods here:
+        private DataTable ExecSP(string spName, System.Data.SqlClient.SqlParameter[] parms = null)
         {
-            try
+            using (var conn = new System.Data.SqlClient.SqlConnection(
+                System.Configuration.ConfigurationManager
+                    .ConnectionStrings["MyConnectionString"].ConnectionString))
             {
-                string insertBook = $@" INSERT INTO BOOKS (Title, ISBN, PublisherID, CategoryID, PublicationYear)  VALUES('{title}','{ISBN}',{publisher_id},{category_id},{publication_year}); SELECT SCOPE_IDENTITY();";
-                object result = dbMan.ExecuteScalar(insertBook);
-                // Step 2: Insert Book Copies
-                int newBookID = Convert.ToInt32(result); ;
-                if (result == null)
-                    return 0;
-                for (int i = 1; i <= numberOfCopies; i++)
+                conn.Open();
+                using (var cmd = new System.Data.SqlClient.SqlCommand(spName, conn))
                 {
-                    string insertCopyQuery = $@"
-                        INSERT INTO BOOK_COPIES (BookID, Status, ShelfLocation)
-                        VALUES ({newBookID}, 'Available', '{shelfLocation}');";
-
-                    dbMan.ExecuteNonQuery(insertCopyQuery);
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    if (parms != null) cmd.Parameters.AddRange(parms);
+                    using (var da = new System.Data.SqlClient.SqlDataAdapter(cmd))
+                    {
+                        var dt = new System.Data.DataTable();
+                        da.Fill(dt);
+                        return dt;
+                    }
                 }
-                return newBookID;   // Return the new BookID if successful
             }
-            catch(Exception ex)
-            {
-                
-                    // You can log the exception here if needed
-                    return -1; // -1 means error
-                
-            }
-
-            ////////////////////////////////////////////////////////
-            ////add more methods here:
-
         }
+
+        // Runs a stored procedure with no result set (INSERT/UPDATE/DELETE)
+        private void ExecSPNonQuery(string spName, System.Data.SqlClient.SqlParameter[] parms = null)
+        {
+            using (var conn = new System.Data.SqlClient.SqlConnection(
+                System.Configuration.ConfigurationManager
+                    .ConnectionStrings["MyConnectionString"].ConnectionString))
+            {
+                conn.Open();
+                using (var cmd = new System.Data.SqlClient.SqlCommand(spName, conn))
+                {
+                    cmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    if (parms != null) cmd.Parameters.AddRange(parms);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        // ── DROPDOWN HELPERS ─────────────────────────────────────────────
+
+        public System.Data.DataTable GetAllCategories()
+        {
+            return ExecSP("sp_GetAllCategories");
+        }
+
+        public System.Data.DataTable GetAllPublishers()
+        {
+            return ExecSP("sp_GetAllPublishers");
+        }
+
+        public System.Data.DataTable GetAllAuthors()
+        {
+            return ExecSP("sp_GetAllAuthors");
+        }
+
+        public System.Data.DataTable GetActiveMembers()
+        {
+            return ExecSP("sp_GetActiveMembers");
+        }
+
+        // ── MODULE 5 METHODS ─────────────────────────────────────────────
+
+        public void AddBook(string title, string isbn, int year, int categoryID, int publisherID)
+        {
+            ExecSPNonQuery("sp_AddBook", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@Title",           title),
+        new System.Data.SqlClient.SqlParameter("@ISBN",            isbn),
+        new System.Data.SqlClient.SqlParameter("@PublicationYear", year),
+        new System.Data.SqlClient.SqlParameter("@CategoryID",      categoryID),
+        new System.Data.SqlClient.SqlParameter("@PublisherID",     publisherID)
+            });
+        }
+
+        public void UpdateBook(int bookID, string title, string isbn, int year, int categoryID, int publisherID)
+        {
+            ExecSPNonQuery("sp_UpdateBook", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@BookID",          bookID),
+        new System.Data.SqlClient.SqlParameter("@Title",           title),
+        new System.Data.SqlClient.SqlParameter("@ISBN",            isbn),
+        new System.Data.SqlClient.SqlParameter("@PublicationYear", year),
+        new System.Data.SqlClient.SqlParameter("@CategoryID",      categoryID),
+        new System.Data.SqlClient.SqlParameter("@PublisherID",     publisherID)
+            });
+        }
+
+        public void DeleteBook(int bookID)
+        {
+            ExecSPNonQuery("sp_DeleteBook", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@BookID", bookID)
+            });
+        }
+
+        public void AddBookCopy(int bookID, string shelfLocation)
+        {
+            ExecSPNonQuery("sp_AddBookCopy", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@BookID",        bookID),
+        new System.Data.SqlClient.SqlParameter("@ShelfLocation", shelfLocation)
+            });
+        }
+
+        public void DeleteBookCopy(int copyID)
+        {
+            ExecSPNonQuery("sp_DeleteBookCopy", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@CopyID", copyID)
+            });
+        }
+
+        public System.Data.DataTable GetBookCopies(int bookID)
+        {
+            return ExecSP("sp_GetBookCopies", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@BookID", bookID)
+            });
+        }
+
+        public System.Data.DataTable SearchBooksAdvanced(string title = null, string author = null, int? categoryID = null, string isbn = null)
+        {
+            return ExecSP("sp_SearchBooks", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@Title",      (object)title      ?? System.DBNull.Value),
+        new System.Data.SqlClient.SqlParameter("@AuthorName", (object)author     ?? System.DBNull.Value),
+        new System.Data.SqlClient.SqlParameter("@CategoryID", (object)categoryID ?? System.DBNull.Value),
+        new System.Data.SqlClient.SqlParameter("@ISBN",       (object)isbn       ?? System.DBNull.Value)
+            });
+        }
+
+        public System.Data.DataTable IssueBook(int userID, int copyID, DateTime dueDate)
+        {
+            return ExecSP("sp_IssueBook", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@UserID",  userID),
+        new System.Data.SqlClient.SqlParameter("@CopyID",  copyID),
+        new System.Data.SqlClient.SqlParameter("@DueDate", dueDate.Date)
+            });
+        }
+
+        public System.Data.DataTable ReturnBook(int borrowID)
+        {
+            return ExecSP("sp_ReturnBook", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@BorrowID",   borrowID),
+        new System.Data.SqlClient.SqlParameter("@FinePerDay", 1.00m)
+            });
+        }
+
+        public System.Data.DataTable GetActiveBorrowings()
+        {
+            return ExecSP("sp_GetActiveBorrowings");
+        }
+
+        public void AddReservation(int userID, int copyID)
+        {
+            ExecSPNonQuery("sp_AddReservation", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@UserID", userID),
+        new System.Data.SqlClient.SqlParameter("@CopyID", copyID)
+            });
+        }
+
+        public void CancelReservation(int reservationID)
+        {
+            ExecSPNonQuery("sp_CancelReservation", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@ReservationID", reservationID)
+            });
+        }
+
+        public void RecordFine(int borrowID, decimal amount)
+        {
+            ExecSPNonQuery("sp_RecordFine", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@BorrowID", borrowID),
+        new System.Data.SqlClient.SqlParameter("@Amount",   amount)
+            });
+        }
+
+        // ── MODULE 8 REPORT METHODS ───────────────────────────────────────
+
+        public System.Data.DataTable Report_LibraryStats() => ExecSP("sp_Report_LibraryStats");
+        public System.Data.DataTable Report_MostBorrowedBooks() => ExecSP("sp_Report_MostBorrowedBooks");
+        public System.Data.DataTable Report_AvgBorrowDuration() => ExecSP("sp_Report_AvgBorrowDuration");
+        public System.Data.DataTable Report_FineRevenue() => ExecSP("sp_Report_FineRevenue");
+        public System.Data.DataTable Report_OverdueStats() => ExecSP("sp_Report_OverdueStats");
+        public System.Data.DataTable Report_BooksByCategory() => ExecSP("sp_Report_BooksByCategory");
+        public System.Data.DataTable Report_TopMembers() => ExecSP("sp_Report_TopMembers");
+        public System.Data.DataTable Report_AuthorPopularity() => ExecSP("sp_Report_AuthorPopularity");
+        public System.Data.DataTable Report_OverdueBooks() => ExecSP("sp_Report_OverdueBooks");
+        public System.Data.DataTable Report_ActiveReservations() => ExecSP("sp_Report_ActiveReservations");
+
+        public System.Data.DataTable Report_BorrowingHistory(
+            int? userID = null, DateTime? startDate = null,
+            DateTime? endDate = null, string statusFilter = null)
+        {
+            return ExecSP("sp_Report_BorrowingHistory", new System.Data.SqlClient.SqlParameter[]
+            {
+        new System.Data.SqlClient.SqlParameter("@UserID",       (object)userID       ?? System.DBNull.Value),
+        new System.Data.SqlClient.SqlParameter("@StartDate",    (object)startDate    ?? System.DBNull.Value),
+        new System.Data.SqlClient.SqlParameter("@EndDate",      (object)endDate      ?? System.DBNull.Value),
+        new System.Data.SqlClient.SqlParameter("@StatusFilter", (object)statusFilter ?? System.DBNull.Value)
+            });
+        }
+
     }
 
 }
