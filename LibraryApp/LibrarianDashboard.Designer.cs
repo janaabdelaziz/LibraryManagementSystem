@@ -28,12 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.InsertBook = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // InsertBook
+            // 
+            this.InsertBook.Location = new System.Drawing.Point(250, 235);
+            this.InsertBook.Name = "InsertBook";
+            this.InsertBook.Size = new System.Drawing.Size(100, 41);
+            this.InsertBook.TabIndex = 0;
+            this.InsertBook.Text = "Insert Book";
+            this.InsertBook.UseVisualStyleBackColor = true;
+            // 
+            // LibrarianDashboard
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.InsertBook);
+            this.Name = "LibrarianDashboard";
             this.Text = "LibrarianDashboard";
+            this.ResumeLayout(false);
+
         }
 
         #endregion
+
+        private System.Windows.Forms.Button InsertBook;
     }
 }
