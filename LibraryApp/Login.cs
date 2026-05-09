@@ -71,5 +71,10 @@ namespace LibraryApp
             SignUp signUpForm = new SignUp();
             signUpForm.Show();
         }
+
+        private void Login_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
