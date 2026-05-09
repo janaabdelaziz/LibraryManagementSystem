@@ -20,7 +20,7 @@ namespace LibraryApp
 
         private void loginbtn_Click(object sender, EventArgs e)
         {
-                Controller controller = new Controller();
+            Controller controller = new Controller();
 
             DataTable dt = controller.Login(usertxt.Text, passtxt.Text);
 
@@ -30,39 +30,38 @@ namespace LibraryApp
                 return;
             }
 
-            bool isActive = Convert.ToBoolean(dt.Rows[0]["IsActive"]);
+            string status = dt.Rows[0]["Status"].ToString();
 
-            if (!isActive)
+            if (status != "Active")
             {
-                MessageBox.Show("This account is deactivated.");
+                MessageBox.Show("Account is not active");
                 return;
             }
 
-            string role = dt.Rows[0]["RoleName"].ToString();
+            string role = dt.Rows[0]["RoleID"].ToString();
 
-            //if (role == "Admin")
-            //{
-            //    AdminDashboard admin = new AdminDashboard();
-            //    admin.Show();
-            //}
-            //else if (role == "Librarian")
-            //{
-            //    LibrarianDashboard librarian = new LibrarianDashboard();
-            //    librarian.Show();
-            //}
-            //else
-            if (role == "Member")
+            if (role == "1")
             {
-                Form1 f = new Form1();;
-                f.Show();
+                AdminDashboard form = new AdminDashboard();
+                form.Show();
             }
-            else
+            else if (role == "3")
             {
-                Form1 f = new Form1();
-                f.Show();
+                Form1 form = new Form1();
+                form.Show();
+            }
+            else if (role == "4")
+            {
+                Form1 form = new Form1();
+                form.Show();
+            }
+            else if (role == "2")
+            {
+                LibrarianDashboard form = new LibrarianDashboard();
+                form.Show();
             }
 
-            this.Hide();
+                //this.Hide();
         }
 
         private void signupbtn_Click(object sender, EventArgs e)
@@ -72,9 +71,10 @@ namespace LibraryApp
             signUpForm.Show();
         }
 
-        private void Login_Load(object sender, EventArgs e)
+        private void forgotbtn_Click(object sender, EventArgs e)
         {
-
+            ChangePassword chpass = new ChangePassword();
+            chpass.Show();
         }
     }
 }

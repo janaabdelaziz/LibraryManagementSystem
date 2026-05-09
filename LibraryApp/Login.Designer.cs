@@ -97,6 +97,7 @@
             this.forgotbtn.TabIndex = 6;
             this.forgotbtn.Text = "Forgot/Change password";
             this.forgotbtn.UseVisualStyleBackColor = true;
+            this.forgotbtn.Click += new System.EventHandler(this.forgotbtn_Click);
             // 
             // Login
             // 
