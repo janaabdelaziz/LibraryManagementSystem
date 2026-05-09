@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace LibraryApp
 {
-    public partial class LibrarianDashboard : Form
+    public partial class AdminDashboard : Form
     {
-        public LibrarianDashboard()
+        public AdminDashboard()
         {
             InitializeComponent();
         }

@@ -40,45 +40,40 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(107, 63);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(143, 77);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(85, 13);
+            this.label1.Size = new System.Drawing.Size(106, 16);
             this.label1.TabIndex = 0;
             this.label1.Text = "Usernam / Email";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(107, 105);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(143, 129);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(53, 13);
+            this.label2.Size = new System.Drawing.Size(67, 16);
             this.label2.TabIndex = 1;
             this.label2.Text = "Password";
             // 
             // usertxt
             // 
-            this.usertxt.Location = new System.Drawing.Point(208, 60);
-            this.usertxt.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.usertxt.Location = new System.Drawing.Point(277, 74);
             this.usertxt.Name = "usertxt";
-            this.usertxt.Size = new System.Drawing.Size(125, 20);
+            this.usertxt.Size = new System.Drawing.Size(165, 22);
             this.usertxt.TabIndex = 2;
             // 
             // passtxt
             // 
-            this.passtxt.Location = new System.Drawing.Point(208, 102);
-            this.passtxt.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.passtxt.Location = new System.Drawing.Point(277, 126);
             this.passtxt.Name = "passtxt";
-            this.passtxt.Size = new System.Drawing.Size(125, 20);
+            this.passtxt.Size = new System.Drawing.Size(165, 22);
             this.passtxt.TabIndex = 3;
             // 
             // loginbtn
             // 
-            this.loginbtn.Location = new System.Drawing.Point(162, 164);
-            this.loginbtn.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.loginbtn.Location = new System.Drawing.Point(216, 202);
             this.loginbtn.Name = "loginbtn";
-            this.loginbtn.Size = new System.Drawing.Size(56, 28);
+            this.loginbtn.Size = new System.Drawing.Size(75, 34);
             this.loginbtn.TabIndex = 4;
             this.loginbtn.Text = "Login";
             this.loginbtn.UseVisualStyleBackColor = true;
@@ -86,10 +81,9 @@
             // 
             // signupbtn
             // 
-            this.signupbtn.Location = new System.Drawing.Point(162, 219);
-            this.signupbtn.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.signupbtn.Location = new System.Drawing.Point(216, 269);
             this.signupbtn.Name = "signupbtn";
-            this.signupbtn.Size = new System.Drawing.Size(56, 28);
+            this.signupbtn.Size = new System.Drawing.Size(75, 34);
             this.signupbtn.TabIndex = 5;
             this.signupbtn.Text = "Sign Up";
             this.signupbtn.UseVisualStyleBackColor = true;
@@ -97,19 +91,19 @@
             // 
             // forgotbtn
             // 
-            this.forgotbtn.Location = new System.Drawing.Point(110, 296);
-            this.forgotbtn.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.forgotbtn.Location = new System.Drawing.Point(146, 364);
             this.forgotbtn.Name = "forgotbtn";
-            this.forgotbtn.Size = new System.Drawing.Size(173, 28);
+            this.forgotbtn.Size = new System.Drawing.Size(231, 34);
             this.forgotbtn.TabIndex = 6;
             this.forgotbtn.Text = "Forgot/Change password";
             this.forgotbtn.UseVisualStyleBackColor = true;
+            this.forgotbtn.Click += new System.EventHandler(this.forgotbtn_Click);
             // 
             // Login
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(401, 393);
+            this.ClientSize = new System.Drawing.Size(535, 484);
             this.Controls.Add(this.forgotbtn);
             this.Controls.Add(this.signupbtn);
             this.Controls.Add(this.loginbtn);
@@ -117,7 +111,6 @@
             this.Controls.Add(this.usertxt);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "Login";
             this.Text = "Login";
             this.Load += new System.EventHandler(this.Login_Load);
