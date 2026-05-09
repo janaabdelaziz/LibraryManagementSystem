@@ -1,4 +1,4 @@
-﻿using System;
+﻿    using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,6 +27,17 @@ namespace LibraryManagementSystem
                 return 0;
 
             return (int)result;
+        }
+        public DataTable Login(string username, string password)
+        {
+            string query = @"
+        SELECT U.UserID, U.FullName, U.Username, U.IsActive, R.RoleName
+        FROM Users U
+        JOIN Roles R ON U.RoleID = R.RoleID
+        WHERE U.Username = '" + username + @"'
+        AND U.Password = '" + password + "'";
+
+            return dbMan.ExecuteReader(query);
         }
 
         // Example: select all users (for a DataGridView later)
